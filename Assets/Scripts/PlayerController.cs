@@ -120,11 +120,15 @@ public class PlayerController : MonoBehaviour
         {
             lifePlayer = lifePlayer - skeletonDamage;
             onLivesChange?.Invoke(lifePlayer);
+            GameManager.instance.addScore();
+            Debug.Log(GameManager.instance.getScore());
         }
         if(collision.gameObject.CompareTag("MiniBoss"))
         {
             lifePlayer = lifePlayer - miniBossDamage;
             onLivesChange?.Invoke(lifePlayer);
+            GameManager.instance.addScore();
+            Debug.Log(GameManager.instance.getScore());
         }
 
          if(collision.gameObject.CompareTag("TrapArrow"))

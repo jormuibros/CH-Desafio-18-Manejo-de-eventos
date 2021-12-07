@@ -12,7 +12,7 @@ public class SwitchTorches : MonoBehaviour
         Debug.Log(other.gameObject.CompareTag("Player"));
         if (other.gameObject.CompareTag("Player"))
         {
-            Debug.Log("DESACTIVAR TRAMPA");
+            Debug.Log("TORCHES OFF");
             onSwitchTrap?.Invoke();
         }
     }

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,14 +14,29 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Animator animPlayer;
     private int temporizador =0;
     [SerializeField] private GameObject Door;
-    [SerializeField] private int lifePlayer = 3;
+    [SerializeField] private GameObject Bottle_Health;
+    [SerializeField] public int lifePlayer = 5;
     private InventoryManager mgInventory;
-    // Start is called before the first frame update
+    
+    [SerializeField] private int skeletonDamage;
+    [SerializeField] private int miniBossDamage;
+
+    [SerializeField] private int trapDamage;
+
+     [SerializeField] private Slider lifeBar;
+
+    //events
+    public static event Action onDeath;
+    public static event Action<int> onLivesChange;
+
+    // Start is called before the first frame update  
     void Start()
     {
         playerRb = GetComponent<Rigidbody>();
         animPlayer.SetBool("isRun", false);
-        mgInventory = GetComponent<InventoryManager>();
+        mgInventory = GetComponent<InventoryManager>();    
+        onLivesChange?.Invoke(lifePlayer);  
+        
     }
 
     // Update is called once per frame
@@ -27,23 +44,26 @@ public class PlayerController : MonoBehaviour
     {
         //Move();
         Attack();
+        GameOver();
        
-        if (Input.GetKeyUp(KeyCode.G) && mgInventory.InventoryOneHas())
+        if (Input.GetKeyDown(KeyCode.Z) && mgInventory.InventoryOneHas())
         {
             UseItem();
+            lifePlayer += 1;  
         }
 
-        if (Input.GetKeyUp(KeyCode.H) && mgInventory.InventoryTwoHas())
+        if (Input.GetKeyDown(KeyCode.X) && mgInventory.InventoryTwoHas())
         {
             UseItem();
+            lifePlayer += 1;  
         }
 
-        if (Input.GetKeyUp(KeyCode.J) && mgInventory.InventoryThreeHas())
+        if (Input.GetKeyDown(KeyCode.C) && mgInventory.InventoryThreeHas())
         {
             UseItem();
-     
-     
+            lifePlayer = lifePlayer + 1; 
         }
+        lifeBar.GetComponent<Slider>().value = lifePlayer;
     }
 
     
@@ -78,54 +98,73 @@ public class PlayerController : MonoBehaviour
            animPlayer.SetBool("isRun", false);
        }
        
+    }    
+
+    
+    void OnTriggerEnter (Collider collision) 
+    {
+    if (collision.gameObject.name == "Lever") 
+    {
+         temporizador ++;
+    }
+    if(temporizador > 2)
+    {
+      Debug.Log("PUERTA DESTRUIDA");
+      Destroy(Door.gameObject);   
+    }
     }
     
-      private void OnCollisionEnter(Collision collision)
+      public void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+         if (collision.gameObject.CompareTag("Enemy"))
         {
-            lifePlayer--;
-            Destroy(collision.gameObject);
-            if(lifePlayer < 0)
-            {
-                Debug.Log("GAME OVER");
-            }
+            lifePlayer = lifePlayer - skeletonDamage;
+            onLivesChange?.Invoke(lifePlayer);
+        }
+        if(collision.gameObject.CompareTag("MiniBoss"))
+        {
+            lifePlayer = lifePlayer - miniBossDamage;
+            onLivesChange?.Invoke(lifePlayer);
+        }
+
+         if(collision.gameObject.CompareTag("TrapArrow"))
+        {
+            lifePlayer = lifePlayer - trapDamage;
+            onLivesChange?.Invoke(lifePlayer);
         }
 
         if (collision.gameObject.CompareTag("Food"))
         {
-            Debug.Log("oro");
+            Debug.Log("food");
             GameObject food = collision.gameObject;
             food.SetActive(false);
-            //mgInventory.AddInventoryOne(food);
-            //mgInventory.SeeInventoryOne();
-            //mgInventory.AddInventoryTwo(food);
-            //mgInventory.SeeInventoryTwo();
-            mgInventory.AddInventoryThree(food.name, food);
-            mgInventory.SeeInventoryThree();
+            mgInventory.AddInventoryFour(food.name, food);
+            mgInventory.SeeInventoryFour();
             mgInventory.CountFood(food);
+        }              
+
+        if(collision.gameObject.CompareTag("Potion"))
+        {
+            lifePlayer = lifePlayer + 5;
+            Destroy(Bottle_Health.gameObject);
+            Debug.Log("POCIÓN DESTRUIDA");
+            onLivesChange?.Invoke(lifePlayer);
         }
 
-         if (collision.gameObject.CompareTag("Gold"))
-        {
-            Debug.Log("oro");
-            GameObject money = collision.gameObject;
-            money.SetActive(false);
-            //mgInventory.AddInventoryOne(food);
-            //mgInventory.SeeInventoryOne();
-            //mgInventory.AddInventoryTwo(food);
-            //mgInventory.SeeInventoryTwo();
-            mgInventory.AddInventoryThree(money.name, money);
-            mgInventory.SeeInventoryThree();
-            mgInventory.CountFood(money);
-        }
-        
     }
-      private void UseItem()
+
+    private void GameOver()
     {
-        //GameObject food = mgInventory.GetInventoryOne();
-        //GameObject food = mgInventory.GetInventoryTwo();
-        GameObject food = mgInventory.GetInventoryThree("egg");
+        if(lifePlayer <= 0)
+        {
+            onDeath?.Invoke();
+            Debug.Log("Player Died");
+        }
+    }
+
+   private void UseItem()
+    {
+        GameObject food = mgInventory.GetInventoryFour("food");
         food.SetActive(true);
         food.transform.position = transform.position + new Vector3(1f,.1f,.1f);
     }

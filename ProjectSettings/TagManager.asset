@@ -4,25 +4,28 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Gold
   - Ground
-  - Food
   - Wapon
+  - Gold
   - Enemy
+  - Food
+  - MiniBoss
+  - Potion
+  - TrapArrow
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Hero
+  - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - ground
+  - Hero
+  - Wall
+  - Door
+  - Lever
+  - Food
+  - Gold
   - 
   - 
   - 

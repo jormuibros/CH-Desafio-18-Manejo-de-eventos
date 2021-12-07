@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class HUDController : MonoBehaviour
 {
@@ -9,19 +10,36 @@ public class HUDController : MonoBehaviour
     [SerializeField] private Text textWatermelon;
     [SerializeField] private Text textApple;
     [SerializeField] private Text textGold;
+    [SerializeField] private TextMeshProUGUI textLives;
+
+    [SerializeField] private TextMeshProUGUI textScore;
 
     [SerializeField]  private InventoryManager mgInventory;
     [SerializeField]  private GameObject panelItems;
-    [SerializeField] private Slider slider;
-	[SerializeField] private Gradient gradient;
-	[SerializeField] private Image fill;
 
-    [SerializeField] private int currentHealth;
+    
 
     // Start is called before the first frame update
+    
+    void Awake()
+    {
+       PlayerController.onLivesChange += onLivesChangeHandler;
+       GameManager.onPointsInScreen += onUpdateScoreHandler;
+    }
+    
     void Start()
     {
         
+    }
+
+    public void onLivesChangeHandler(int health)
+    {
+        textLives.text = "HP " + health;
+    }
+
+    public void onUpdateScoreHandler(int points)
+    {
+        textScore.text = "Score " + points;
     }
 
     // Update is called once per frame
@@ -36,30 +54,11 @@ public class HUDController : MonoBehaviour
         textPeach.text = "x"+foodCount[0];
         textWatermelon.text = "x"+foodCount[1];
         textApple.text = "x"+foodCount[2];
+        textGold.text = "x"+foodCount[3];
     }
 
     public void TooglePanel()
     {
         panelItems.SetActive(!panelItems.activeSelf);
     }
-    public void SetMaxHealth(int health)
-	{
-		slider.maxValue = health;
-		slider.value = health;
-
-		fill.color = gradient.Evaluate(1f);
-	}
-
-    public void SetHealth(int health)
-	{
-		slider.value = health;
-
-		fill.color = gradient.Evaluate(slider.normalizedValue);
-	}
-
-    public void TakeDamage(int damage)
-    {
-        currentHealth = damage;
-    }
-
 }
